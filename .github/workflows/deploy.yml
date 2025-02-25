@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write  # 👈 Добавили права на запись!
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -19,5 +22,6 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.0
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # 👈 Добавили токен!
           branch: gh-pages
           folder: dist
