@@ -1,34 +1,16 @@
-const STORAGE_KEY = 'feedback-msg';
+const STORAGE_KEY = 'feedback-form-state';
 
 const refs = {
   form: document.querySelector('.feedback-form'),
 };
 
-let arr = [];
+let formData = { email: '', message: '' };
 
 refs.form.addEventListener('input', e => {
-  const email = e.currentTarget.elements.email.value.trim();
-  const message = e.currentTarget.elements.message.value.trim();
-  const data = { email, message };
-  saveToLS(STORAGE_KEY, data);
-});
-
-function initPage() {
-  const formData = loadFromLS(STORAGE_KEY);
-  refs.form.elements.email.value = formData?.email || '';
-  refs.form.elements.message.value = formData?.message || '';
-}
-
-initPage();
-
-refs.form.addEventListener('submit', e => {
-  e.preventDefault();
-  const email = e.currentTarget.elements.email.value.trim();
-  const message = e.currentTarget.elements.message.value.trim();
-  const data = { email, message };
-  console.log(data);
-  localStorage.removeItem(STORAGE_KEY);
-  refs.form.reset();
+  if (e.target.name === 'email' || e.target.name === 'message') {
+    formData[e.target.name] = e.target.value.trim();
+    saveToLS(STORAGE_KEY, formData);
+  }
 });
 
 function saveToLS(key, value) {
@@ -37,11 +19,35 @@ function saveToLS(key, value) {
 }
 
 function loadFromLS(key) {
-  const body = localStorage.getItem(key);
+  const savedData = localStorage.getItem(key);
   try {
-    const data = JSON.parse(body);
-    return data;
+    return savedData ? JSON.parse(savedData) : null;
   } catch {
-    return body;
+    return null;
   }
 }
+
+function initPage() {
+  const savedData = loadFromLS(STORAGE_KEY);
+  if (savedData) {
+    formData = savedData;
+    refs.form.elements.email.value = formData.email || '';
+    refs.form.elements.message.value = formData.message || '';
+  }
+}
+initPage();
+
+refs.form.addEventListener('submit', e => {
+  e.preventDefault();
+
+  if (!formData.email || !formData.message) {
+    alert('Fill please all fields');
+    return;
+  }
+
+  console.log(formData);
+
+  localStorage.removeItem(STORAGE_KEY);
+  refs.form.reset();
+  formData = { email: '', message: '' };
+});
